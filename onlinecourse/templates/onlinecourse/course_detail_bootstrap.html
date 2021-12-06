@@ -6,7 +6,6 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <link rel="stylesheet" href="{% static 'onlinecourse/course.css' %}" type="text/css">
     <meta charset="UTF-8">
 </head>
 
@@ -58,14 +57,9 @@
             <!--
 
             A collapse example here:-->
-            {% if user.is_authenticated %}
-              <button class="dropbtn" data-toggle="collapse" data-target="#exam">
-                Start Exam
-              </button>
-              <div id="exam" class="dropdown-content collapse">
 
-              </div>
-            {% endif %}
+            <div id="exam" class="{% if user.is_authenticated %}collapse show{% else %}collapse{% endif %}">
+              <h1>Start Exam</h1>
 
 
             <!-- <HINT> If user is authenticated, show course exam with a list of question -->
@@ -80,26 +74,30 @@
             <input type="check" name="choice_{{choice.id}}" id="{{choice.id}}" ...>
             -->
 
-            <!-- A choice submission form example
-            <form id="questionform" action="point to a submit view" method="post">
-                        ... for each question in the course ...
-                        <div class="card mt-1">
-                            <div class="card-header"><h5>{{ question.question_text}}</h5></div>
-                            {% csrf_token %}
-                            <div class="form-group">
-                               ... for each choice in the question ...
-                                <div class="form-check">
-                                    <label class="form-check-label">
-                                        <input type="checkbox" name="choice_{{choice.id}}"
-                                               class="form-check-input" id="{{choice.id}}"
-                                               value="{{choice.id}}">{{ choice.choice_text }}
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    <input class="btn btn-success btn-block" type="submit" value="Submit">
-            </form>
--->
+            <!-- A choice submission form example -->
+
+              <form id="questionform" action="point to a submit view" method="post">
+                          {% for question in course.question_set.all %}
+                          <div class="card mt-1">
+                            <p>{{question.question_text}}</p>
+                              <div class="card-header"><h5>{{ question.question_text}}</h5></div>
+                              {% csrf_token %}
+                              <div class="form-group">
+                                 {% for choice in question.choices.all %}
+                                  <div class="form-check">
+                                      <label class="form-check-label">
+                                          <input type="checkbox" name="choice_{{choice.id}}"
+                                                 class="form-check-input" id="{{choice.id}}"
+                                                 value="{{choice.id}}">{{ choice.choice_content }}
+                                      </label>
+                                  </div>
+                                  {% endfor %}
+                              </div>
+                          </div>
+                          {% endfor %}
+                      <input class="btn btn-success btn-block" type="submit" value="Submit">
+              </form>
+            </div>
             <!--Check here to see more details Bootstrap checkbox
              https://www.w3schools.com/bootstrap4/bootstrap_forms_inputs.asp-->
     </div>
