@@ -115,10 +115,10 @@ def submit(request, course_id):
     course = Course.objects.get(pk=course_id)
     usr_enrollment = Enrollment.objects.get(user=user, course=course)
     submitted_anwsers = extract_answers(request)
-    Submission.objects.create(enrollment=usr_enrollment, choices=submitted_anwsers)
-    submission.save()
+    submission = Submission.objects.create(enrollment=usr_enrollment)
+    submission.choices.set(submitted_anwsers)
 
-    return Redirect('onlinecourse:show_exam_result', course.id, submission.id)
+    return redirect('onlinecourse:results', course_id, submission.id)
 
 
 # <HINT> A example method to collect the selected choices from the exam form from the request object
@@ -139,7 +139,22 @@ def extract_answers(request):
         # For each selected choice, check if it is a correct answer or not
         # Calculate the total score
 def show_exam_result(request, course_id, submission_id):
+    from django.db.models import Sum
     course = Course.objects.get(pk=course_id)
     submission = Submission.objects.get(pk=submission_id)
+    possible_points = course.question_set.all().aggregate(Sum("question_point_value"))["question_point_value__sum"]
+    achieved_points = 0
+    for question in course.question_set.all():
+        if question.is_get_score(submission.choices.all()):
+            achieved_points +=question.question_point_value
 
-    for choice in submission.choices:
+    context = {
+        'course': course,
+        'achieved_points': achieved_points,
+        'possible_points': possible_points,
+        'questions': course.question_set.all(),
+        'selected_choices': submission.choices.all(),
+        'grade': achieved_points/possible_points*100,
+    }
+
+    return render(request, 'onlinecourse/exam_result_bootstrap.html', context)

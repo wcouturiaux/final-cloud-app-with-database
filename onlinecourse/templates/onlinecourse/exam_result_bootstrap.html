@@ -39,16 +39,42 @@
     {% if grade > 80 %}
     <div class="alert alert-success">
        <!--HINT Display passed info -->
+       Congratulations, {{user.first_name}}! You have passed the exam and
+       and completed the course with a score of {{ achieved_points }}/{{ possible_points }}
     </div>
-        {% else %}
+    {% else %}
         <div class="alert alert-danger">
             <!--HINT Display failed info -->
+            Sorry, {{user.first_name}}. You have failed the exam with a
+            score of {{ achieved_points }}/{{ possible_points }}
         </div>
         <a class="btn btn-link text-danger" href="{% url 'onlinecourse:course_details' course.id %}">Re-test</a>
-        {% endif %}
+    {% endif %}
         <div class="card-columns-vertical mt-1">
         <h5 class="">Exam results</h5>
             <!--HINT Display exam results-->
+            {% for question in questions %}
+            <div class="card mt-1">
+              <div class="card-header"><h5>{{question.question_text}}</h5></div>
+              <div class="card-body">
+                {% for choice in question.choice_set.all %}
+                  {% if choice in selected_choices %}
+                    {% if choice.correct_choice %}
+                      <p class="alert alert-success">Correct answer: {{choice}} </p>
+                    {% else %}
+                      <p class="alert alert-danger"> Incorrect answer: {{choice}} </p>
+                    {% endif %}
+                  {% else %}
+                    {% if choice.correct_choice %}
+                      <p class="alert alert-warning">Not Selected: {{choice}} </p>
+                    {% else %}
+                      <p>{{choice}}</p>
+                    {% endif %}
+                  {% endif %}
+                {% endfor %}
+              </div>
+            </div>
+          {% endfor %}
         </div>
     </div>
 </body>
